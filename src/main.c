@@ -23,9 +23,12 @@ void render(void)
 
   draw_grid();
 
-  for (int i = 0; i < N_CUBE_FACES; ++i)
+  int num_triangles = array_length(triangles_to_render);
+
+  for (int i = 0; i < num_triangles; ++i)
   {
     triangle_t triangle = triangles_to_render[i];
+
     draw_rect(triangle.points[0].x, triangle.points[0].y, 3, 3, 0xFFFF00);
     draw_rect(triangle.points[1].x, triangle.points[1].y, 3, 3, 0xFFFF00);
     draw_rect(triangle.points[2].x, triangle.points[2].y, 3, 3, 0xFFFF00);
@@ -36,6 +39,8 @@ void render(void)
       triangle.points[2].x, triangle.points[2].y,
       0xFF00FF00);
   }
+
+  array_free(triangles_to_render);
 
   render_color_buffer();
   clear_color_buffer(0xFF000000);
@@ -66,7 +71,8 @@ void setup(void)
     is_running = false;
   }
 
-  load_cube_mesh_data();
+  //load_cube_mesh_data();
+  load_obj_file_data("./assets/f22.obj");
 }
 
 void process_input(void)
@@ -112,8 +118,8 @@ void update(void)
   triangles_to_render = NULL;
 
   mesh.rotation.x += 0.01;
-  mesh.rotation.y += 0.01;
-  mesh.rotation.z += 0.01;
+  mesh.rotation.y += 0.00;
+  mesh.rotation.z += 0.00;
 
   int num_faces = array_length(mesh.faces);
 
