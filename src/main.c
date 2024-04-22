@@ -10,6 +10,8 @@
 #include "vector.h"
 
 bool is_running = false;
+bool render_fill = true;
+
 int previous_frame_time = 0;
 float fov_factor = 640;
 
@@ -29,9 +31,18 @@ void render(void)
   {
     triangle_t triangle = triangles_to_render[i];
 
-    draw_rect(triangle.points[0].x, triangle.points[0].y, 3, 3, 0xFFFF00);
-    draw_rect(triangle.points[1].x, triangle.points[1].y, 3, 3, 0xFFFF00);
-    draw_rect(triangle.points[2].x, triangle.points[2].y, 3, 3, 0xFFFF00);
+    // draw_rect(triangle.points[0].x, triangle.points[0].y, 3, 3, 0xFFFF00);
+    // draw_rect(triangle.points[1].x, triangle.points[1].y, 3, 3, 0xFFFF00);
+    // draw_rect(triangle.points[2].x, triangle.points[2].y, 3, 3, 0xFFFF00);
+
+    if (render_fill)
+    {
+      draw_filled_triangle(
+        triangle.points[0].x, triangle.points[0].y,
+        triangle.points[1].x, triangle.points[1].y,
+        triangle.points[2].x, triangle.points[2].y,
+        0x00808080);
+    }
 
     draw_triangle(
       triangle.points[0].x, triangle.points[0].y,
@@ -39,7 +50,6 @@ void render(void)
       triangle.points[2].x, triangle.points[2].y,
       0xFF00FF00);
   }
-
   array_free(triangles_to_render);
 
   render_color_buffer();
@@ -90,6 +100,10 @@ void process_input(void)
       {
         is_running = false;
       }
+      if (event.key.keysym.sym == SDLK_f)
+      {
+        render_fill = !render_fill;
+      }
       break;
   }
 }
@@ -118,8 +132,8 @@ void update(void)
   triangles_to_render = NULL;
 
   mesh.rotation.x += 0.01;
-  mesh.rotation.y += 0.01;
-  mesh.rotation.z += 0.01;
+  mesh.rotation.y += 0.00;
+  mesh.rotation.z += 0.00;
 
   int num_faces = array_length(mesh.faces);
 
