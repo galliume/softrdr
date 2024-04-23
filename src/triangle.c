@@ -64,9 +64,20 @@ void draw_filled_triangle(
     int_swap(&x0, &x1);
   }
 
-  int my = y1;
-  int mx = ((float)((x2 - x0) * (y1 - y0)) / (float)(y2 - y0)) + x0;
+  if (y1 == y2)
+  {
+    fill_flat_bottom_triangle(x0, y0, x1, y1, x2, y2, color);
+  }
+  else if (y0 == y1)
+  {
+    fill_flat_top_triangle(x0, y0, x1, y1, x2, y2, color);
+  }
+  else
+  {
+    int my = y1;
+    int mx = ((float)((x2 - x0) * (y1 - y0)) / (float)(y2 - y0)) + x0;
 
-  fill_flat_bottom_triangle(x0, y0, x1, y1, mx, my, color);
-  fill_flat_top_triangle(x1, y1, mx, my, x2, y2, color);
+    fill_flat_bottom_triangle(x0, y0, x1, y1, mx, my, color);
+    fill_flat_top_triangle(x1, y1, mx, my, x2, y2, color);
+  }
 }
