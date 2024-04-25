@@ -89,8 +89,8 @@ void setup(char *obj_file)
     is_running = false;
   }
 
-  //load_cube_mesh_data();
-  load_obj_file_data(obj_file);
+  load_cube_mesh_data();
+  //load_obj_file_data(obj_file);
 }
 
 void process_input(void)
@@ -221,15 +221,35 @@ void update(void)
 
     }
 
+    float average_depth =
+      (transformed_vertices[0].z + transformed_vertices[1].z + transformed_vertices[2].z) / 3.0;
+
     triangle_t projected_triangle = {
       .points = {
         { projected_points[0].x, projected_points[0].y },
         { projected_points[1].x, projected_points[1].y },
         { projected_points[2].x, projected_points[2].y }
       },
-      .color = mesh_face.color
+      .color = mesh_face.color,
+      .average_depth = average_depth
     };
 
+    //simple bubble sort.
+    //@todo change if too slow
+    int num_triangles = array_length(triangles_to_render);
+
+    for (int i = 0; i < num_triangles; ++i)
+    {
+      for (int j = i; j < num_triangles; ++j)
+      {
+        if (triangles_to_render[i].average_depth < triangles_to_render[j].average_depth)
+        {
+          triangle_t temp = triangles_to_render[i];
+          triangles_to_render[i] = triangles_to_render[j];
+          triangles_to_render[j] = temp;
+        }
+      }
+    }
     array_push(triangles_to_render, projected_triangle);
   }
 }
