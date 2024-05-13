@@ -178,6 +178,13 @@ void update(void)
 
   int num_faces = array_length(mesh.faces);
 
+  mat4_t world_matrix = mat4_identity();
+  world_matrix = mat4_mul_mat4(scale_m, world_matrix);
+  world_matrix = mat4_mul_mat4(rotation_m_x, world_matrix);
+  world_matrix = mat4_mul_mat4(rotation_m_y, world_matrix);
+  world_matrix = mat4_mul_mat4(rotation_m_z, world_matrix);
+  world_matrix = mat4_mul_mat4(translation_m, world_matrix);
+
   for (int i = 0; i < num_faces; ++i)
   {
     face_t mesh_face = mesh.faces[i];
@@ -192,13 +199,7 @@ void update(void)
     for (int j = 0; j < 3; ++j)
     {
       vec4_t transformed_vertex = vec4_from_vec3(face_vertices[j]);
-
-      transformed_vertex = mat4_mul_vec4(scale_m, transformed_vertex);
-      transformed_vertex = mat4_mul_vec4(rotation_m_x, transformed_vertex);
-      transformed_vertex = mat4_mul_vec4(rotation_m_y, transformed_vertex);
-      transformed_vertex = mat4_mul_vec4(rotation_m_z, transformed_vertex);
-      transformed_vertex = mat4_mul_vec4(translation_m, transformed_vertex);
-
+      transformed_vertex = mat4_mul_vec4(world_matrix, transformed_vertex);
       transformed_vertices[j] = transformed_vertex;
     }
 
