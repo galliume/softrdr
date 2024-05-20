@@ -4,9 +4,10 @@
 
 #include <SDL2/SDL.h>
 
-#include "defines.h"
 #include "array.h"
+#include "defines.h"
 #include "display.h"
+#include "light.h"
 #include "matrix.h"
 #include "mesh.h"
 #include "vector.h"
@@ -90,8 +91,8 @@ void setup(char *obj_file)
     is_running = false;
   }
 
-  load_cube_mesh_data();
-  //load_obj_file_data(obj_file);
+  //load_cube_mesh_data();
+  load_obj_file_data(obj_file);
 }
 
 void process_input(void)
@@ -203,24 +204,25 @@ void update(void)
       transformed_vertices[j] = transformed_vertex;
     }
 
+    vec3_t vec_a = vec3_from_vec4(transformed_vertices[0]);
+    vec3_t vec_b = vec3_from_vec4(transformed_vertices[1]);
+    vec3_t vec_c = vec3_from_vec4(transformed_vertices[2]);
+
+    vec3_t vector_ab = vec3_sub(vec_b, vec_a);
+    vec3_t vector_ac = vec3_sub(vec_c, vec_a);
+
+    vec3_normalize(&vector_ab);
+    vec3_normalize(&vector_ac);
+
+    vec3_t normal = vec3_cross(vector_ab, vector_ac);//left handed coord system
+    vec3_normalize(&normal);
+
+    vec3_t camera_ray = vec3_sub(camera_position, vec_a);
+
+    float dot_normal_camera = vec3_dot(normal, camera_ray);
+
     if (cull_method == CULL_BACKFACE)
     {
-      vec3_t vec_a = vec3_from_vec4(transformed_vertices[0]);
-      vec3_t vec_b = vec3_from_vec4(transformed_vertices[1]);
-      vec3_t vec_c = vec3_from_vec4(transformed_vertices[2]);
-
-      vec3_t vector_ab = vec3_sub(vec_b, vec_a);
-      vec3_t vector_ac = vec3_sub(vec_c, vec_a);
-
-      vec3_normalize(&vector_ab);
-      vec3_normalize(&vector_ac);
-
-      vec3_t normal = vec3_cross(vector_ab, vector_ac);//left handed coord system
-      vec3_normalize(&normal);
-
-      vec3_t camera_ray = vec3_sub(camera_position, vec_a);
-
-      float dot_normal_camera = vec3_dot(normal, camera_ray);
 
       if (dot_normal_camera < 0) continue; //simple back face culling
     }
@@ -238,13 +240,18 @@ void update(void)
     float average_depth =
       (transformed_vertices[0].z + transformed_vertices[1].z + transformed_vertices[2].z) / 3.0;
 
+    float light_intensity_factor = -vec3_dot(normal, light.direction);
+
+    uint32_t triangle_color = mesh_face.color;
+    triangle_color = light_apply_intensity(triangle_color, light_intensity_factor);
+
     triangle_t projected_triangle = {
       .points = {
         { projected_points[0].x, projected_points[0].y },
         { projected_points[1].x, projected_points[1].y },
         { projected_points[2].x, projected_points[2].y }
       },
-      .color = mesh_face.color,
+      .color = triangle_color,
       .average_depth = average_depth
     };
 
